@@ -33,7 +33,7 @@ library(shinyBS)
 library(shinythemes)
 library(openxlsx)
 library(jsonlite)
-library(synapseClient)
+library(synapser)
 library(shinydashboard)
 library(data.table)
 library(DT)
@@ -43,7 +43,7 @@ library(DT)
 # or caching credentials can also be done from the command line client:
 # synapse login -u me@nowhere.com -p secret --rememberMe
 # ----------------------------------------------------------------------
-synapseLogin()
+synLogin()
 
 # ----------------------------------------------------------------------
 options(stringsAsFactors = FALSE)
@@ -51,7 +51,7 @@ options(stringsAsFactors = FALSE)
 # by replacing the global dat variable
 # you may use this app using the standard schema but your own melted data 
 queryResult <- synTableQuery('select * from syn10242922')
-dat <- as.data.frame(queryResult@values)
+dat <- queryResult$asDataFrame()
 print(head(dat))
 
 categories <- lapply(unique(dat$module), function(x) {x})
@@ -59,9 +59,9 @@ key <- unique(dat$key)
 value <- unique(dat$value)
 
 all.vars <- names(dat)
-names(dat) <- c("key", "description", "columnType", "maximumSize", "value", "valueDescription", "source", "module")
+names(dat) <- c("ROW_ID", "ROW_VERSION", "key", "description", "columnType", "maximumSize", "value", "valueDescription", "source", "module")
 dat <- dat %>% mutate_all(as.character)
 
 # Get release version from syanpe table annotations
 table <- synGet("syn10242922")
-release.version <- annotations(table)$annotationReleaseVersion
+release.version <- synGetAnnotations(table)$annotationReleaseVersion
